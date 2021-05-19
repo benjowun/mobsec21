@@ -1,0 +1,2 @@
+rootProject.name = "mobsec21"
+include ':app'

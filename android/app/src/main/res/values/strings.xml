@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">mobsec21</string>
+    <string name="send">Send</string>
+    <string name="qr">QR</string>
+    <string name="to_send">To Send</string>
+    <string name="check">Check</string>
+    <string name="secret_key">Secret Key</string>
+</resources>
