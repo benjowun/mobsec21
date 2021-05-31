@@ -9,26 +9,22 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.budiyev.android.codescanner.*
-import java.security.SecureRandom
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 
 class MainActivity : AppCompatActivity() {
     private val RC_PERMISSION: Int = 10
     private lateinit var sendButton: Button
     private lateinit var codeScanner: CodeScanner //https://github.com/yuriy-budiyev/code-scanner
     private var permissionsGranted = false
-    var code: Int = 0
-    var sk: Int = 0
-    var message: String = ""
+    private val cryptoStuff = CryptoStuff()
 
+    var message: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sendButton = findViewById((R.id.button_send))
         val scannerView = findViewById<CodeScannerView>(R.id.scanner_view)
+        val textField = findViewById<EditText>(R.id.editTextTextMessage)
 
         codeScanner = CodeScanner(this, scannerView)
 
@@ -45,8 +41,12 @@ class MainActivity : AppCompatActivity() {
         codeScanner.decodeCallback = DecodeCallback {
             runOnUiThread {
                 Toast.makeText(this, "Scan result: ${it.text}", Toast.LENGTH_LONG).show()
-                // TODO: parse secret key / random IV for key derivation function? and check from qr code
-                // Key derivation then based on that secret key / IV
+                val skCandidate = it.rawBytes
+                if (skCandidate.size == 16) { // TODO: this allows people with physical access to set null keys... but if they have physical access I guess youre screwed anyways
+                    cryptoStuff.setSK(it.rawBytes)
+                    sendButton.isEnabled = true
+                    textField.isEnabled = true
+                }
             }
         }
         codeScanner.errorCallback = ErrorCallback { // or ErrorCallback.SUPPRESS
@@ -96,17 +96,13 @@ class MainActivity : AppCompatActivity() {
         message = text.text.toString()
         val toast = Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT)
         toast.show()
-    }
 
-    // TODO: still unfinished, see guide: https://www.geeksforgeeks.org/symmetric-encryption-cryptography-in-java/
-    private fun encryptMessage(plaintext: ByteArray) {
-        val keygen = KeyGenerator.getInstance("AES")
-        val secRand = SecureRandom()
-        keygen.init(256, secRand) // TODO: init this with passed number from qr reading
-        val key: SecretKey = keygen.generateKey()
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING") //is actually PKCS7, vulnerable to padding attacks? But attackers do not control messages... so...
-        cipher.init(Cipher.ENCRYPT_MODE, key)
-        val ciphertext: ByteArray = cipher.doFinal(plaintext)
-        val iv: ByteArray = cipher.iv
+        // to ensure that we have set a valid SK
+        assert(!cryptoStuff.isSKNull()) // fails since no QR code was read
+        val messageBytes = message.toByteArray()
+        val messageEncrypted = cryptoStuff.encryptSecure(messageBytes)
+
+
+        // TODO: send to server here
     }
 }
