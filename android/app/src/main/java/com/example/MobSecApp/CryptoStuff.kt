@@ -130,6 +130,10 @@ class CryptoStuff {
             SecretKeySpec(encKey, "AES"),
             IvParameterSpec(iv)
         )
+
+        // update SK
+        updateSK()
+
         return cipher.doFinal(ciphertext)
 
     }

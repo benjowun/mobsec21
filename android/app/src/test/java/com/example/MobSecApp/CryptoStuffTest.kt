@@ -21,7 +21,7 @@ class CryptoStuffTest {
     fun encryptSecure() {
         val sk = cs.generateSecretKey()
         val pt = "thisisatesttextthatis longer with spaces and 1223".toByteArray()
-        val enc = cs.encryptSecure(sk, pt)
+        val enc = cs.encryptSecure(pt)
         println(enc)
     }
 
@@ -31,19 +31,20 @@ class CryptoStuffTest {
         val pt = "thisisatesttextthatis longer with spaces and 1223".toByteArray()
         val pt2 = "thisisatesttext".toByteArray()
         val pt3 = "this is a test text".toByteArray()
-        val enc = cs.encryptSecure(sk, pt)
-        val enc2 = cs.encryptSecure(sk, pt2)
-        val enc3 = cs.encryptSecure(sk, pt3)
+        val enc = cs.encryptSecure(pt)
+        val enc2 = cs.encryptSecure(pt2)
+        val enc3 = cs.encryptSecure(pt3)
 
-        var dec = cs.decryptSecure(sk, enc)
+        cs.setSK(sk)
+        var dec = cs.decryptSecure(enc)
         assert(dec != null)
         println(String(dec!!))
 
-        dec = cs.decryptSecure(sk, enc2)
+        dec = cs.decryptSecure(enc2)
         assert(dec != null)
         println(String(dec!!))
 
-        dec = cs.decryptSecure(sk, enc3)
+        dec = cs.decryptSecure(enc3)
         assert(dec != null)
         println(String(dec!!))
     }
@@ -51,14 +52,14 @@ class CryptoStuffTest {
     @Test
     fun testGen() {
         val sk = cs.generateSecretKey()
-        val salt = "testtesttest".toByteArray()
         val cs2 = CryptoStuff()
+        cs2.setSK(sk)
 
-        val key1 = cs.updateSK(sk)
-        val key2 = cs.updateSK(key1)
+        val key1 = cs.updateSK()
+        val key2 = cs.updateSK()
 
-        val key21 = cs2.updateSK(sk)
-        val key22 = cs2.updateSK(key1)
+        val key21 = cs2.updateSK()
+        val key22 = cs2.updateSK()
 
         assert(key1.contentEquals(key21))
         assert(key2.contentEquals(key22))
@@ -78,24 +79,21 @@ class CryptoStuffTest {
         // other device, cs is phone
         val cs2 = CryptoStuff()
         // generate key on other device, share via qr code
-        var sk2 = cs2.generateSecretKey()
-        var sk1 = sk2.clone()
+        val sk2 = cs2.generateSecretKey()
+        val sk1 = sk2.clone()
+        cs.setSK(sk1)
 
         assert(sk2.contentEquals(sk1))
 
         // on phone encryption
-        val enc1 = cs.encryptSecure(sk1, pt1)
-        sk1 = cs.updateSK(sk1)
-        val enc2 = cs.encryptSecure(sk1, pt2)
-        sk1 = cs.updateSK(sk1)
-        val enc3 = cs.encryptSecure(sk1, pt3)
+        val enc1 = cs.encryptSecure(pt1)
+        val enc2 = cs.encryptSecure(pt2)
+        val enc3 = cs.encryptSecure(pt3)
 
         // decryption on pc
-        val dec1 = cs2.decryptSecure(sk2, enc1)
-        sk2 = cs.updateSK(sk2)
-        val dec2 = cs.decryptSecure(sk2, enc2)
-        sk2 = cs.updateSK(sk2)
-        val dec3 = cs.decryptSecure(sk2, enc3)
+        val dec1 = cs2.decryptSecure(enc1)
+        val dec2 = cs2.decryptSecure(enc2)
+        val dec3 = cs2.decryptSecure(enc3)
 
         assert(dec1.contentEquals(pt1))
         assert(dec2.contentEquals(pt2))
