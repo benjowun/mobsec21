@@ -42,8 +42,12 @@ dependencies {
     implementation 'com.budiyev.android:code-scanner:2.1.0'
     // https://mvnrepository.com/artifact/at.favre.lib/hkdf
     implementation group: 'at.favre.lib', name: 'hkdf', version: '1.1.0'
+    // HTTP stuff
+    //implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
 
     testImplementation 'junit:junit:4.+'
+    testImplementation 'org.json:json:20201115'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

@@ -9,8 +9,8 @@
 
     <com.budiyev.android.codescanner.CodeScannerView
         android:id="@+id/scanner_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="408dp"
+        android:layout_height="391dp"
         android:layout_marginBottom="64dp"
         app:autoFocusButtonColor="@android:color/white"
         app:autoFocusButtonVisible="true"
@@ -27,6 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         app:maskColor="#77000000" />
 
     <Button
@@ -44,16 +45,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/editTextTextMessage"
         app:layout_constraintTop_toBottomOf="@+id/scanner_view"
-        app:layout_constraintVertical_bias="0.625" />
+        app:layout_constraintVertical_bias="0.487" />
 
     <EditText
         android:id="@+id/editTextTextMessage"
         android:layout_width="240dp"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="2dp"
         android:layout_marginEnd="2dp"
-        android:layout_marginBottom="2dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:enabled="false"
         android:inputType="textPersonName"
@@ -62,29 +62,25 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button_send"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPhone"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <EditText
+        android:id="@+id/editTextPhone"
+        android:layout_width="240dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="2dp"
+        android:ems="10"
+        android:enabled="false"
+        android:inputType="number"
+        android:text="@string/_0660_123456789"
+        android:textColor="#FFEB3B"
+        app:layout_constraintBottom_toTopOf="@+id/editTextTextMessage"
+        app:layout_constraintEnd_toStartOf="@+id/button_send"
+        app:layout_constraintHorizontal_bias="0.37"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scanner_view" />
 
-    <TextView
-        android:id="@+id/check"
-        android:layout_width="173dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="18dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/check"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/sk"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/sk"
-        android:layout_width="173dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="18dp"
-        android:text="@string/secret_key"
-        app:layout_constraintEnd_toStartOf="@+id/check"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

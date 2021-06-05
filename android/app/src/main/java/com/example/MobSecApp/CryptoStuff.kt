@@ -6,7 +6,9 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
-import javax.crypto.*
+import javax.crypto.Cipher
+import javax.crypto.Mac
+import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
@@ -16,7 +18,7 @@ class CryptoStuff {
     private var sk = ByteArray(0) // TODO: how to securely store
 
     fun generateSecretKey(): ByteArray {
-        val key: ByteArray = ByteArray(16)
+        val key = ByteArray(16)
         sr.nextBytes(key)
         this.sk = key
         return key
@@ -31,7 +33,7 @@ class CryptoStuff {
     }
 
     fun updateSK(): ByteArray {
-        val newKey = HKDF.fromHmacSha256().extractAndExpand(ByteArray(0), this.sk, null,16)
+        val newKey = HKDF.fromHmacSha256().extractAndExpand(ByteArray(0), this.sk, null, 16)
 
         this.sk = newKey
         return newKey
@@ -43,13 +45,20 @@ class CryptoStuff {
         sr.nextBytes(iv) // get unique IV
 
         // generate enc and auth keypair, using HKDF
-        val encKey: ByteArray = HKDF.fromHmacSha256().expand(this.sk, "encKey".toByteArray(
-            StandardCharsets.UTF_8), 16)
-        val authKey: ByteArray = HKDF.fromHmacSha256().expand(this.sk, "authKey".toByteArray(
-            StandardCharsets.UTF_8), 32)
+        val encKey: ByteArray = HKDF.fromHmacSha256().expand(
+            this.sk, "encKey".toByteArray(
+                StandardCharsets.UTF_8
+            ), 16
+        )
+        val authKey: ByteArray = HKDF.fromHmacSha256().expand(
+            this.sk, "authKey".toByteArray(
+                StandardCharsets.UTF_8
+            ), 32
+        )
 
         // ENC
-        val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding") //actually  PKCS7, we encrypt then MAC, so padding is ok
+        val cipher: Cipher =
+            Cipher.getInstance("AES/CBC/PKCS5Padding") //actually  PKCS7, we encrypt then MAC, so padding is ok
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(encKey, "AES"), IvParameterSpec(iv))
         val ciphertext: ByteArray = cipher.doFinal(pt)
 
@@ -72,7 +81,7 @@ class CryptoStuff {
 
         // clear memory as good as possible
         authKey.map { it * 0 }
-        encKey.map {it * 0}
+        encKey.map { it * 0 }
 
         // update sk
         updateSK()
