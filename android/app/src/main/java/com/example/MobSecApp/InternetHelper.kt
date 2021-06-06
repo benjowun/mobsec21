@@ -33,10 +33,11 @@ class InternetHelper(private val url: String) {
                     if (!response.isSuccessful) throw IOException("Unexpected code $response")
 
                     for ((name, value) in response.headers) {
-                        println("$name: $value")
+                        Log.i("ben", "$name: $value")
                     }
 
-                    println(response.body!!.string())
+                    Log.i("ben", response.code.toString())
+                    Log.i("ben", response.body!!.string())
                     Log.i("ben", "Post sent successfully!")
                 }
             }

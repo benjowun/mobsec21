@@ -4,27 +4,28 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.budiyev.android.codescanner.*
 
+
 class MainActivity : AppCompatActivity() {
     private val RC_PERMISSION: Int = 10
 
-    // for testing, TODO: not sure if it is secure to have the url in plaintext... but I guess it is fine since everything is encrypted
-    private val apiAddress = "https://httpbin.org/anything"
+    // not best practice to have the url in plaintext, but since everything is encrypted, we focussed on other stuff for now
+    private val apiAddress = "https://benjomobsec.azurewebsites.net/Data/SendMsgPost"
 
     private lateinit var sendButton: Button
     private lateinit var codeScanner: CodeScanner //https://github.com/yuriy-budiyev/code-scanner
     private var permissionsGranted = false
-    private val cryptoStuff = CryptoStuff()
-    private val internetHelper = InternetHelper(apiAddress)
+    private val cryptoStuff = CryptoStuff(this)
+    val internetHelper = InternetHelper(apiAddress)
 
-    var phoneNumber: String = ""
-    var message: String = ""
+    private var phoneNumber: String = ""
+    private var message: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +34,13 @@ class MainActivity : AppCompatActivity() {
         val scannerView = findViewById<CodeScannerView>(R.id.scanner_view)
         val textField = findViewById<EditText>(R.id.editTextTextMessage)
         val textFieldPhone = findViewById<EditText>(R.id.editTextPhone)
+
+//        getUserPassword()
+        if (cryptoStuff.readSK()) { // update SK to use existing one if able
+            sendButton.isEnabled = true
+            textField.isEnabled = true
+            textFieldPhone.isEnabled = true
+        }
 
         codeScanner = CodeScanner(this, scannerView)
 
@@ -48,13 +56,16 @@ class MainActivity : AppCompatActivity() {
         // Callbacks
         codeScanner.decodeCallback = DecodeCallback {
             runOnUiThread {
-                var skCandidate = it.rawBytes
+                val qrText = it.text
+                var skCandidate = internetHelper.base64Decode(qrText)
                 Toast.makeText(
                     this,
                     "Scan result: ${it.text}:   ${skCandidate.size}",
                     Toast.LENGTH_LONG
                 ).show()
-                if (skCandidate.size >= 16) { // TODO: this allows people with physical access to set null keys... but if they have physical access I guess youre screwed anyways
+
+                Log.i("ben", "Scan result: ${it.text}:   ${skCandidate.size}")
+                if (skCandidate.size >= 16) {
                     if (skCandidate.size > 16)
                         skCandidate = skCandidate.sliceArray(0..16)
                     cryptoStuff.setSK(skCandidate)
@@ -64,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        codeScanner.errorCallback = ErrorCallback { // or ErrorCallback.SUPPRESS
+        codeScanner.errorCallback = ErrorCallback {
             runOnUiThread {
                 Toast.makeText(
                     this, "Camera initialization error: ${it.message}",
@@ -81,6 +92,29 @@ class MainActivity : AppCompatActivity() {
             codeScanner.startPreview()
         }
     }
+
+//    private fun getUserPassword() {
+//        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+//        builder.setTitle("Password input")
+//
+//        // Set up the input
+//        val input = EditText(this)
+//        input.transformationMethod = PasswordTransformationMethod.getInstance()
+//        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+//        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+//        builder.setView(input)
+//
+//
+//        // Set up the buttons
+//        builder.setPositiveButton("OK"
+//        ) { _, _ ->
+//            keyStorePw = input.text.toString().toCharArray()
+//        }
+//
+//        builder.setNegativeButton("Cancel",
+//            DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+//        builder.show()
+//    }
 
     @SuppressLint("MissingPermission", "HardwareIds")
     @Override
@@ -109,7 +143,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
     }
 
-    fun sendMessage(view: View) {
+    fun sendMessage() {
         val text = findViewById<EditText>(R.id.editTextTextMessage)
         val number = findViewById<EditText>(R.id.editTextPhone)
         message = text.text.toString()

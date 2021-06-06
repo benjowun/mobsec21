@@ -1,14 +1,9 @@
 package com.example.MobSecApp
 
-import at.favre.lib.crypto.HKDF
 import org.junit.Test
 
-import org.junit.Assert.*
-import org.junit.Before
-import java.nio.charset.StandardCharsets
-
 class CryptoStuffTest {
-    val cs: CryptoStuff = CryptoStuff()
+    val cs: CryptoStuff = CryptoStuff(null)
 
     @Test
     fun generateSecretKey() {
@@ -52,7 +47,7 @@ class CryptoStuffTest {
     @Test
     fun testGen() {
         val sk = cs.generateSecretKey()
-        val cs2 = CryptoStuff()
+        val cs2 = CryptoStuff(null)
         cs2.setSK(sk)
 
         val key1 = cs.updateSK()
@@ -77,7 +72,7 @@ class CryptoStuffTest {
         val pt3 = "this is a test text".toByteArray()
 
         // other device, cs is phone
-        val cs2 = CryptoStuff()
+        val cs2 = CryptoStuff(null)
         // generate key on other device, share via qr code
         val sk2 = cs2.generateSecretKey()
         val sk1 = sk2.clone()

@@ -1,5 +1,6 @@
 package com.example.MobSecApp
 
+import android.content.Context
 import android.util.Log
 import at.favre.lib.crypto.HKDF
 import java.nio.ByteBuffer
@@ -13,9 +14,32 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 
-class CryptoStuff {
+class CryptoStuff(private val mainActivity: MainActivity?) {
     private val sr = SecureRandom()
-    private var sk = ByteArray(0) // TODO: how to securely store
+    private var sk = ByteArray(0)
+
+
+    fun readSK(): Boolean {
+        val sharedPref = mainActivity?.getPreferences(Context.MODE_PRIVATE)
+        val key64 = sharedPref?.getString("key", "")
+        if (key64 != "") {
+            if (mainActivity != null) {
+                sk = mainActivity.internetHelper.base64Decode(key64!!)
+            }
+            Log.i("ben", "read key from memory")
+            return true
+        }
+        return false
+    }
+
+    private fun storeSK(key: ByteArray) {
+        val sharedPref = mainActivity?.getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putString("key", mainActivity.internetHelper.base64Encode(key))
+            apply()
+        }
+        Log.i("ben", "stored key in memory")
+    }
 
     fun generateSecretKey(): ByteArray {
         val key = ByteArray(16)
@@ -25,6 +49,7 @@ class CryptoStuff {
     }
 
     fun setSK(key: ByteArray) {
+        storeSK(key)
         sk = key
     }
 
@@ -36,6 +61,7 @@ class CryptoStuff {
         val newKey = HKDF.fromHmacSha256().extractAndExpand(ByteArray(0), this.sk, null, 16)
 
         this.sk = newKey
+        storeSK(this.sk) // stores to FS
         return newKey
     }
 
