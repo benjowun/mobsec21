@@ -1,6 +1,9 @@
 
 import java.util.Base64;
+import javax.swing.Box;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -23,16 +26,29 @@ public class MainGUI extends javax.swing.JFrame implements ThreadCompleteListene
     public MainGUI() 
     {
         initComponents();
-        mc = new MainController();
-        this.setSize(500, 900);
-        this.setLocationRelativeTo(null);
-        
-        this.startUpRoutine();
-        
-        thread = new HTTPThread(mc.getUser(), mc.getServer());
-        thread.addListener(this);
-        thread.start();
-        //mc.getUser().setMsgId(0);
+        JPasswordField jpf = new JPasswordField(24);
+        JLabel jl = new JLabel("Please enter the password for your key! If do have one, you can set one here: ");
+        Box box = Box.createHorizontalBox();
+        box.add(jl);
+        box.add(jpf);
+        int x = JOptionPane.showConfirmDialog(this, box, "Password", JOptionPane.OK_CANCEL_OPTION);
+        if(x == JOptionPane.OK_OPTION && !(new String(jpf.getPassword())).equals(""))
+        {
+            mc = new MainController(new String(jpf.getPassword()));
+            this.setSize(500, 900);
+            this.setLocationRelativeTo(null);
+
+            this.startUpRoutine();
+
+            thread = new HTTPThread(mc.getUser(), mc.getServer());
+            thread.addListener(this);
+            thread.start();
+            //mc.getUser().setMsgId(0);
+        }
+        else
+        {
+            System.exit(0);
+        }
     }
     
     private void startUpRoutine()

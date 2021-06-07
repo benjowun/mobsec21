@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="myModel-Web.config Connection String" description="myModel Die in der Datei &amp;quot;web.config&amp;quot; festgelegte Verbindungszeichenfolge, die von der Anwendung für den Zugriff auf die Datenbank verwendet wird." defaultValue="data source=(LocalDb)\MSSQLLocalDB;initial catalog=MoblieSecServerTest.myModel;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Johannes\ Loibner\\source\\repos\\MoblieSecServerTest\\MoblieSecServerTest\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='myModel']/@connectionString" />
+  </parameter>
+</parameters>

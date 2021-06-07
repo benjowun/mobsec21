@@ -32,6 +32,7 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.JOptionPane;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -50,9 +51,9 @@ public class MainController {
     private File qrCode;
     private String server;
     
-    public MainController()
+    public MainController(String password)
     {
-        keyStorePw = "Jolk(/587!jk".toCharArray();
+        keyStorePw = password.toCharArray();
         user = new UserData(null, null, -1);
         qrCode = new File(System.getProperty("user.dir") + File.separator + "qrCode.jpeg");
         server = "https://benjomobsec.azurewebsites.net";
@@ -96,6 +97,7 @@ public class MainController {
             secretKey = new SecretKeySpec(bigInt.toByteArray(), 0, bigInt.toByteArray().length, "AES");
             secret = new KeyStore.SecretKeyEntry(secretKey);
             ks.setEntry(user.getPhoneNumber()+"-userid", secret, password);
+            
             FileOutputStream fos = new FileOutputStream("msKeyStore.jks");
             ks.store(fos, keyStorePw);
         }
@@ -117,7 +119,20 @@ public class MainController {
         catch(FileNotFoundException ex)
         {
             System.out.println("WriteUserData: " + ex.getMessage());
-            return false;
+            try
+            {
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                ks.load(null, keyStorePw);
+                FileOutputStream fos = new FileOutputStream("msKeyStore.jks");
+                ks.store(fos, keyStorePw);
+                this.writeUserData();
+            }
+            catch(Exception ex1)
+            {
+                System.out.println("WriteUserData: " + ex1.getMessage());
+                return false;
+            }
+            //return false;
         }
         catch(IOException ex)
         {
@@ -259,8 +274,8 @@ public class MainController {
     
     public void updateKey()
     {
-        //byte [] newKey = HKDF.fromHmacSha256().extractAndExpand(new byte [0], user.getPrivateKey(), null, 16);
-        //user.setPrivateKey(newKey);
+        byte [] newKey = HKDF.fromHmacSha256().extractAndExpand(new byte [0], user.getPrivateKey(), null, 16);
+        user.setPrivateKey(newKey);
     }
     
     public static void main(String[] args) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException 
